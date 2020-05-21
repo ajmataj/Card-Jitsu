@@ -1,0 +1,62 @@
+html,
+body {
+  height: 100%;
+}
+
+.container {
+  position: relative;
+}
+
+.card-container {
+  border-style: solid;
+  border-radius: 0.5em;
+  border-width: 0.4em;
+  min-width: 8em;
+  min-height: 8em;
+}
+
+.clash-container {
+  min-width: 8em;
+  min-height: 8em;
+}
+
+.clash-opponent-active {
+  background-color: blue;
+  border-color: black;
+}
+
+.opponent {
+  min-width: 3em;
+  min-height: 3em;
+  background-color: blue;
+  border: 0.2em solid;
+}
+
+.opponent-invisible {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.data-container {
+  max-width: 2em;
+  max-height: 3.2em;
+  border-bottom-right-radius: 0.6em;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+#game {
+  position: relative;
+}
+
+#opponent {
+  padding: 1em;
+}
+
+#clashing-cards {
+  margin: 8em auto;
+}
+
+#player {
+  margin: auto 0.5em;
+}
