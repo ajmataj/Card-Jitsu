@@ -1,9 +1,6 @@
 html,
 body {
-  height: 100%;
-}
-
-.container {
+  height: 100vh;
   position: relative;
 }
 
@@ -45,18 +42,35 @@ body {
   font-weight: bold;
 }
 
-#game {
-  position: relative;
+.element-win-pile {
+  height: 2em;
 }
 
-#opponent {
-  padding: 1em;
+.win-card {
+  height: 2em;
+  width: 2em;
+  border-radius: 0.3em;
+  margin-left: 0.3em;
+}
+
+.wcard-icon {
+  margin-top: 10%;
+  margin-left: 20%;
+}
+
+#row-middle {
+  height: 67vh;
+}
+
+#row-top {
+  height: 12vh;
+}
+
+#row-bottom {
+  height: 21vh;
 }
 
 #clashing-cards {
-  margin: 8em auto;
-}
-
-#player {
-  margin: auto 0.5em;
+  height: 8em;
+  width: 17em;
 }

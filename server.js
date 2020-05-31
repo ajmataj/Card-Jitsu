@@ -94,14 +94,21 @@ io.on('connection', socket => {
 });
 
 const resolveRound = () => {
-  const roundWinner = getRoundWinIndex();
-  const roundLoser = roundWinner == 0 ? 1 : 0;
-  players[roundWinner].moveToWinPile(pickedCards[roundWinner]);
-  players[roundLoser].randInsert(pickedCards[roundLoser]);
+  const roundWinIndex = getRoundWinIndex();
+  if (roundWinIndex == -1) {
+    players[0].moveToBack(pickedCards[0]);
+    players[1].moveToBack(pickedCards[1]);
+  } else {
+    const roundWinner = roundWinIndex;
+    const roundLoser = roundWinner == 0 ? 1 : 0;
+    players[roundWinner].moveToWinPile(pickedCards[roundWinner]);
+    players[roundLoser].moveToBack(pickedCards[roundLoser]);
+  }
   // console.log(`P1 WP: ${JSON.stringify(players[0].getWinPile())}
   // P2 WP: ${JSON.stringify(players[1].getWinPile())}`);
   pickedCards[0] = null;
   pickedCards[1] = null;
+  checkForWin();
 };
 
 const revealCards = () => {
@@ -112,6 +119,13 @@ const revealCards = () => {
 const resetRound = () => {
   connections[0].emit('new-game', players[0].getHand());
   connections[1].emit('new-game', players[1].getHand());
+
+  // console.log(`Player 1 WP: ${JSON.stringify(players[0].getWinPile())}`);
+  // console.log(`Player 2 WP: ${JSON.stringify(players[1].getWinPile())}`);
+  const winPiles = [players[0].getWinPile(), players[1].getWinPile()];
+
+  connections[0].emit('update-win-piles', (winPiles));
+  connections[1].emit('update-win-piles', (winPiles.reverse()));
 };
 
 const getRoundWinIndex = () => {
@@ -132,6 +146,56 @@ const getRoundWinIndex = () => {
   }
   return winningIndex;
 };
+
+const checkForWin = () => {
+  players.forEach(player => {
+    if (player.getWinPile().length >= 3) {
+      const winPile = player.getWinPile();
+      var counts = {
+        'fire': 0,
+        'water': 0,
+        'ice': 0
+      };
+      winPile.forEach(card => {
+        counts[card.element]++;
+      });
+      const elementPresent = count => count > 0;
+      const threeOrMore = count => count >= 3;
+
+      if (Object.values(counts).every(elementPresent)) {
+        console.log('1 of each element present for potential win');
+        const fireCards = winPile.filter(card => card.element == 'fire');
+        const waterCards = winPile.filter(card => card.element == 'water');
+        const iceCards = winPile.filter(card => card.element == 'ice');
+
+        fireCards.forEach(fCard => {
+          waterCards.forEach(wCard => {
+            if (wCard.color != fCard.color) {
+              iceCards.forEach(iCard => {
+                if (iCard.color != wCard.color && iCard.color != fCard.color) {
+                  console.log('WINNER', [fCard, wCard, iCard]);
+                }
+              })
+            }
+          })
+        })
+      }
+
+      else if (Object.values(counts).some(threeOrMore)) {
+        console.log('3 of one element present for potential win');
+
+        for (let [key, value] of Object.entries(counts)) {
+          if (value >= 3) {
+            let firstCard = winPile.find(card => card.element == key);
+            let secondCard = winPile.find(card => card.element == key && card.color != firstCard.color);
+            let thirdCard = winPile.find(card => card.element == key && ![firstCard.color, secondCard.color].includes(card.color));
+            if (firstCard && secondCard && thirdCard) console.log('WINNER', [firstCard, secondCard, thirdCard]);
+          }
+        }
+      }
+    }
+  });
+}
 
 // Shuffle deck
 const shuffleDeck = deck => {

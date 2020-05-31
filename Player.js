@@ -18,24 +18,32 @@ class Player {
   }
 
   moveToWinPile(card) {
-    this.winPile = [...this.winPile, card];
-    this.deck.splice(
-      this.deck.findIndex(
-        x => x.value == card.value && x.element == card.element
-      ),
-      1
+    const winningIndex = this.deck.findIndex(
+      x => x.value == card.value && x.element == card.element
     );
+    const winningCard = this.deck.splice(winningIndex, 1);
+    this.shiftReplacement(winningIndex);
+    this.winPile = [...this.winPile, ...winningCard];
   }
 
   getWinPile() {
     return this.winPile;
   }
 
-  randInsert(card) {
+  shiftReplacement(destination) {
+    for (let i = 4; i > destination; i--) {
+      let temp = this.deck[i];
+      this.deck[i] = this.deck[i - 1];
+      this.deck[i - 1] = temp;
+    }
+  }
+
+  moveToBack(card) {
     const losingIndex = this.deck.findIndex(
       x => x.value == card.value && x.element == card.element
     );
     const losingCard = this.deck.splice(losingIndex, 1);
+    this.shiftReplacement(losingIndex);
     this.deck.push(losingCard);
   }
 }

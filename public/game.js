@@ -12,6 +12,9 @@ const clashCards = document
   .getElementById('clashing-cards')
   .getElementsByClassName('clash-container');
 
+var playerWinPileLength = 0;
+var opponentWinPileLength = 0;
+
 const populateCard = (container, data) => {
   container.classList.remove('invisible');
   container.style.borderColor = data.color;
@@ -37,6 +40,7 @@ const populateCard = (container, data) => {
 
 for (let i = 0; i < playerCards.length; i++) {
   playerCards[i].addEventListener('click', () => {
+    document.getElementById('player').style = 'pointer-events: none;'
     playerCards[i].classList.add('invisible');
     socket.emit('chosen-card', playerCards[i].id);
   });
@@ -59,6 +63,7 @@ socket.on('new-game', data => {
     card.children[0].style.backgroundColor = 'transparent';
     card.classList.remove('card-container', 'clash-opponent-active');
   });
+  document.getElementById('player').style = 'pointer-events: auto;'
 });
 
 socket.on('lift-card', data => {
@@ -76,4 +81,64 @@ socket.on('reveal-opponent-card', data => {
   clashCards[0].classList.add('card-container');
   clashCards[0].classList.remove('clash-opponent-active');
   populateCard(clashCards[0], data);
+});
+
+socket.on('update-win-piles', data => {
+  // Player's win pile
+  if (data[0].length > playerWinPileLength) {
+    playerWinPileLength++;
+    const card = data[0][data[0].length-1];
+    const newDiv = document.createElement('div');
+    newDiv.classList.add('win-card');
+    newDiv.style.backgroundColor = card.color;
+    let elementID;
+    let img = new Image();
+    img.width = 20;
+    img.classList.add('wcard-icon');
+    switch (card.element) {
+      case 'fire':
+        img.src = './public/icons/fire_icon.png';
+        elementID = 'player-fire-wins';
+        break;
+      case 'water':
+        img.src = './public/icons/water_icon.png';
+        elementID = 'player-water-wins';
+        break;
+      case 'ice':
+        img.src = './public/icons/ice_icon.png';
+        elementID = 'player-ice-wins';
+        break;
+    }
+    newDiv.appendChild(img);
+    document.getElementById(elementID).appendChild(newDiv);
+  }
+
+  if (data[1].length > opponentWinPileLength) {
+    opponentWinPileLength++;
+    const card = data[1][data[1].length - 1];
+    console.log(card);
+    const newDiv = document.createElement('div');
+    newDiv.classList.add('win-card');
+    newDiv.style.backgroundColor = card.color;
+    let elementID;
+    let img = new Image();
+    img.width = 20;
+    img.classList.add('wcard-icon');
+    switch (card.element) {
+      case 'fire':
+        img.src = './public/icons/fire_icon.png';
+        elementID = 'opp-fire-wins';
+        break;
+      case 'water':
+        img.src = './public/icons/water_icon.png';
+        elementID = 'opp-water-wins';
+        break;
+      case 'ice':
+        img.src = './public/icons/ice_icon.png';
+        elementID = 'opp-ice-wins';
+        break;
+    }
+    newDiv.appendChild(img);
+    document.getElementById(elementID).appendChild(newDiv);
+  }
 });

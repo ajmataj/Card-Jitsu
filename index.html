@@ -14,40 +14,74 @@
     <script src="/socket.io/socket.io.js"></script>
   </head>
   <body>
-    <div class="container h-100" id="game">
-      <div class="row">
-        <div id="opponent">
-          <h3>Opponent</h3>
-          <div class="row">
-            <div class="col-xs-5 card-container opponent m-1"></div>
-            <div class="col-xs-5 card-container opponent m-1"></div>
-            <div class="col-xs-5 card-container opponent m-1"></div>
-            <div class="col-xs-5 card-container opponent m-1"></div>
-            <div class="col-xs-5 card-container opponent m-1"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row my-auto">
-        <div id="clashing-cards">
-          <div class="row justify-content-center">
-            <div class="col-s-2 clash-container m-1">
-              <div class="data-container">
-                <div class="element"></div>
-                <div class="value"></div>
-              </div>
-            </div>
-            <div class="col-s-2 clash-container m-1">
-              <div class="data-container">
-                <div class="element"></div>
-                <div class="value"></div>
-              </div>
+    <div class="container-fluid d-flex h-100 flex-column" id="game">
+      <div class="row mx-1">
+        <div class="col">
+          <div id="opponent">
+            <h3>Opponent</h3>
+            <div class="row">
+              <div class="col-xs-5 card-container opponent m-1"></div>
+              <div class="col-xs-5 card-container opponent m-1"></div>
+              <div class="col-xs-5 card-container opponent m-1"></div>
+              <div class="col-xs-5 card-container opponent m-1"></div>
+              <div class="col-xs-5 card-container opponent m-1"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="row ml-1">
+      <div class="row mx-1">
+        <div class="col">
+          <div class="col" id="opponent-wins">
+            <div
+              class="col d-flex justify-content-start element-win-pile m-1"
+              id="opp-fire-wins"
+            ></div>
+            <div
+              class="col d-flex justify-content-start element-win-pile m-1"
+              id="opp-water-wins"
+            ></div>
+            <div
+              class="col d-flex justify-content-start element-win-pile m-1"
+              id="opp-ice-wins"
+            ></div>
+          </div>
+
+          <div class="col w-100" id="clashing-cards">
+            <div class="row justify-content-center">
+              <div class="col-s-2 clash-container m-1">
+                <div class="data-container">
+                  <div class="element"></div>
+                  <div class="value"></div>
+                </div>
+              </div>
+              <div class="col-s-2 clash-container m-1">
+                <div class="data-container">
+                  <div class="element"></div>
+                  <div class="value"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col" id="player-wins">
+            <div
+              class="col d-flex justify-content-end element-win-pile my-1"
+              id="player-fire-wins"
+            ></div>
+            <div
+              class="col d-flex justify-content-end element-win-pile my-1"
+              id="player-water-wins"
+            ></div>
+            <div
+              class="col d-flex justify-content-end element-win-pile my-1"
+              id="player-ice-wins"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mx-1">
         <div class="ml-auto" id="player">
           <h3 id="player-name">You</h3>
           <div class="row mx-.75">
