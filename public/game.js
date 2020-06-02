@@ -52,7 +52,7 @@ socket.on('player-number', data => {
   })`;
 });
 
-socket.on('new-game', data => {
+socket.on('new-round', data => {
   [...playerCards].forEach((card, i) => {
     populateCard(card, data[i]);
     if (opponentCards[i].classList.contains('opponent-invisible'))
@@ -142,3 +142,18 @@ socket.on('update-win-piles', data => {
     document.getElementById(elementID).appendChild(newDiv);
   }
 });
+
+socket.on('announce-winner', data => {
+  alert(`Player ${parseFloat(data.playerNum) + 1} wins with:
+  ${JSON.stringify(data.winningCards[0].element)} ${JSON.stringify(data.winningCards[0].color)}
+  ${JSON.stringify(data.winningCards[1].element)} ${JSON.stringify(data.winningCards[1].color)}
+  ${JSON.stringify(data.winningCards[2].element)} ${JSON.stringify(data.winningCards[2].color)}
+  \nRestarting game in 5 seconds...`);
+  setTimeout(() => {
+    location.reload();
+  }, 5000);
+});
+
+socket.on('opponent-disconnect', () => {
+  location.reload();
+})

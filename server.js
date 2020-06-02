@@ -51,6 +51,7 @@ io.on('connection', socket => {
   socket.on('disconnect', () => {
     console.log(`Player ${parseFloat(playerIndex) + 1} has disconnected`);
     connections[playerIndex] = null;
+    socket.broadcast.emit('opponent-disconnect');
   });
 
   pickedCards[0] = null;
@@ -59,8 +60,8 @@ io.on('connection', socket => {
   // Begin game when 2 sockets are connected
   if (connections[0] && connections[1]) {
     console.log('Game ready');
-    connections[0].emit('new-game', players[0].getHand());
-    connections[1].emit('new-game', players[1].getHand());
+    connections[0].emit('new-round', players[0].getHand());
+    connections[1].emit('new-round', players[1].getHand());
   }
 
   socket.on('chosen-card', data => {
@@ -72,9 +73,6 @@ io.on('connection', socket => {
       }
     });
     const card = players[playerNum].getCard(data);
-    // console.log(
-    //   `Player ${parseFloat(playerNum) + 1} selected ${JSON.stringify(card)}`
-    // );
 
     socket.emit('lift-card', card);
     socket.broadcast.emit('opponent-lift', data);
@@ -86,7 +84,6 @@ io.on('connection', socket => {
         revealCards();
         setTimeout(() => {
           resolveRound();
-          resetRound();
         }, 1000);
       }, 1000);
     }
@@ -104,11 +101,15 @@ const resolveRound = () => {
     players[roundWinner].moveToWinPile(pickedCards[roundWinner]);
     players[roundLoser].moveToBack(pickedCards[roundLoser]);
   }
-  // console.log(`P1 WP: ${JSON.stringify(players[0].getWinPile())}
-  // P2 WP: ${JSON.stringify(players[1].getWinPile())}`);
+  
   pickedCards[0] = null;
   pickedCards[1] = null;
-  checkForWin();
+
+  const winningInfo = checkForWin();
+  if (winningInfo) {
+    connections[0].emit('announce-winner', winningInfo);
+    connections[1].emit('announce-winner', winningInfo);
+  } else resetRound();
 };
 
 const revealCards = () => {
@@ -117,11 +118,9 @@ const revealCards = () => {
 };
 
 const resetRound = () => {
-  connections[0].emit('new-game', players[0].getHand());
-  connections[1].emit('new-game', players[1].getHand());
-
-  // console.log(`Player 1 WP: ${JSON.stringify(players[0].getWinPile())}`);
-  // console.log(`Player 2 WP: ${JSON.stringify(players[1].getWinPile())}`);
+  connections[0].emit('new-round', players[0].getHand());
+  connections[1].emit('new-round', players[1].getHand());
+  
   const winPiles = [players[0].getWinPile(), players[1].getWinPile()];
 
   connections[0].emit('update-win-piles', (winPiles));
@@ -148,7 +147,8 @@ const getRoundWinIndex = () => {
 };
 
 const checkForWin = () => {
-  players.forEach(player => {
+  let winnerInfo;
+  players.forEach((player, playerNum) => {
     if (player.getWinPile().length >= 3) {
       const winPile = player.getWinPile();
       var counts = {
@@ -163,7 +163,6 @@ const checkForWin = () => {
       const threeOrMore = count => count >= 3;
 
       if (Object.values(counts).every(elementPresent)) {
-        console.log('1 of each element present for potential win');
         const fireCards = winPile.filter(card => card.element == 'fire');
         const waterCards = winPile.filter(card => card.element == 'water');
         const iceCards = winPile.filter(card => card.element == 'ice');
@@ -173,7 +172,10 @@ const checkForWin = () => {
             if (wCard.color != fCard.color) {
               iceCards.forEach(iCard => {
                 if (iCard.color != wCard.color && iCard.color != fCard.color) {
-                  console.log('WINNER', [fCard, wCard, iCard]);
+                  winnerInfo = {
+                    'playerNum': playerNum,
+                    'winningCards': [fCard, wCard, iCard]
+                  };
                 }
               })
             }
@@ -182,19 +184,23 @@ const checkForWin = () => {
       }
 
       else if (Object.values(counts).some(threeOrMore)) {
-        console.log('3 of one element present for potential win');
-
         for (let [key, value] of Object.entries(counts)) {
           if (value >= 3) {
             let firstCard = winPile.find(card => card.element == key);
             let secondCard = winPile.find(card => card.element == key && card.color != firstCard.color);
             let thirdCard = winPile.find(card => card.element == key && ![firstCard.color, secondCard.color].includes(card.color));
-            if (firstCard && secondCard && thirdCard) console.log('WINNER', [firstCard, secondCard, thirdCard]);
+            if (firstCard && secondCard && thirdCard) {
+              winnerInfo = {
+                'playerNum': playerNum,
+                'winningCards': [firstCard, secondCard, thirdCard]
+              };
+            }
           }
         }
       }
     }
   });
+  return winnerInfo;
 }
 
 // Shuffle deck
