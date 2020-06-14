@@ -22,25 +22,38 @@ const populateCard = (container, data) => {
   const targetDivs = container.querySelectorAll('.element, .value');
   targetDivs[1].textContent = data.value;
   if (targetDivs[0].hasChildNodes()) targetDivs[0].innerHTML = '';
-  let img = new Image();
-  img.width = 20;
+
+  if (data.picture) {
+    let img = new Image();
+    img.src = data.picture;
+
+    let images = container.getElementsByClassName('picture');
+    while (images[0]) images[0].parentNode.removeChild(images[0]);
+    console.log(images);
+
+    img.classList.add('picture');
+    container.appendChild(img);
+  }
+
+  let icon = new Image();
+  icon.width = 25;
   switch (data.element) {
     case 'fire':
-      img.src = './public/icons/fire_icon.png';
+      icon.src = './public/icons/fire_icon.png';
       break;
     case 'water':
-      img.src = './public/icons/water_icon.png';
+      icon.src = './public/icons/water_icon.png';
       break;
     case 'ice':
-      img.src = './public/icons/ice_icon.png';
+      icon.src = './public/icons/ice_icon.png';
       break;
   }
-  targetDivs[0].appendChild(img);
+  targetDivs[0].appendChild(icon);
 };
 
 for (let i = 0; i < playerCards.length; i++) {
   playerCards[i].addEventListener('click', () => {
-    document.getElementById('player').style = 'pointer-events: none;'
+    document.getElementById('player').style = 'pointer-events: none;';
     playerCards[i].classList.add('invisible');
     socket.emit('chosen-card', playerCards[i].id);
   });
@@ -59,9 +72,13 @@ socket.on('new-round', data => {
       opponentCards[i].classList.remove('opponent-invisible');
   });
   [...clashCards].forEach(card => {
-    populateCard(card, { value: null, element: null });
+    populateCard(card, { value: null, element: null, picture: null });
     card.children[0].style.backgroundColor = 'transparent';
     card.classList.remove('card-container', 'clash-opponent-active');
+    let images = card.getElementsByTagName('img');
+    if (images.length > 0) {
+      while(images[0]) images[0].parentNode.removeChild(images[0]);
+    }
   });
   document.getElementById('player').style = 'pointer-events: auto;'
 });
@@ -92,24 +109,24 @@ socket.on('update-win-piles', data => {
     newDiv.classList.add('win-card');
     newDiv.style.backgroundColor = card.color;
     let elementID;
-    let img = new Image();
-    img.width = 20;
-    img.classList.add('wcard-icon');
+    let icon = new Image();
+    icon.width = 20;
+    icon.classList.add('wcard-icon');
     switch (card.element) {
       case 'fire':
-        img.src = './public/icons/fire_icon.png';
+        icon.src = './public/icons/fire_icon.png';
         elementID = 'player-fire-wins';
         break;
       case 'water':
-        img.src = './public/icons/water_icon.png';
+        icon.src = './public/icons/water_icon.png';
         elementID = 'player-water-wins';
         break;
       case 'ice':
-        img.src = './public/icons/ice_icon.png';
+        icon.src = './public/icons/ice_icon.png';
         elementID = 'player-ice-wins';
         break;
     }
-    newDiv.appendChild(img);
+    newDiv.appendChild(icon);
     document.getElementById(elementID).appendChild(newDiv);
   }
 
@@ -121,24 +138,24 @@ socket.on('update-win-piles', data => {
     newDiv.classList.add('win-card');
     newDiv.style.backgroundColor = card.color;
     let elementID;
-    let img = new Image();
-    img.width = 20;
-    img.classList.add('wcard-icon');
+    let icon = new Image();
+    icon.width = 20;
+    icon.classList.add('wcard-icon');
     switch (card.element) {
       case 'fire':
-        img.src = './public/icons/fire_icon.png';
+        icon.src = './public/icons/fire_icon.png';
         elementID = 'opp-fire-wins';
         break;
       case 'water':
-        img.src = './public/icons/water_icon.png';
+        icon.src = './public/icons/water_icon.png';
         elementID = 'opp-water-wins';
         break;
       case 'ice':
-        img.src = './public/icons/ice_icon.png';
+        icon.src = './public/icons/ice_icon.png';
         elementID = 'opp-ice-wins';
         break;
     }
-    newDiv.appendChild(img);
+    newDiv.appendChild(icon);
     document.getElementById(elementID).appendChild(newDiv);
   }
 });

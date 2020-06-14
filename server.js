@@ -65,6 +65,7 @@ io.on('connection', socket => {
   }
 
   socket.on('chosen-card', data => {
+    if (!players[0] || !players[1]) return;
     let playerNum = -1;
     players.forEach((player, i) => {
       if (socket === player.socket) {
